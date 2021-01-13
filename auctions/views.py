@@ -74,6 +74,18 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+def listing(requst, listing_id):
+    # query db for listing
+    try:
+        listing = Listing.objects.get(pk=listing_id)
+        # send to page
+        return HttpResponse(listing)
+
+    except Listing.DoesNotExist:
+        return redirect(reverse("index"))
+
+
+@login_required
 def add_listing(request):
     if request.method == "GET":
         form = ListingForm()
@@ -102,7 +114,9 @@ def add_listing(request):
 
             listing.save()
 
-            return redirect(reverse("index"))  # <<<<<<<<<<< redirect to listing TODO
+            print(listing.id)
+
+            return redirect("listing", listing_id=listing.id)
 
         else:
             render(request, "auctions/add_listing.html", {"form": form})
