@@ -1,7 +1,27 @@
 {% extends "auctions/layout.html" %}
 
+<!--  -->
 {% block body %}
-    <h2>Active Listings</h2>
+<h2>Active Listings</h2>
+<br />
+<!--  -->
+{% for listing in listings %}
+<!--  -->
+<article class="listing">
+    <div class="info">
+        <!-- title, description, current price -->
+        <h4>{{ listing.title }}</h4>
+        <p>{{ listing.description }}</p>
+        <p>Current bid: ${{ listing.start_bid }}</p>
+    </div>
+    <div class="image-container">
+        {% if listing.image %}
+        <img src="{{ listing.image }}" alt="" />
 
-    TODO
+        {% endif %}
+    </div>
+</article>
+<!--  -->
+{% endfor %}
+<!--  -->
 {% endblock %}
