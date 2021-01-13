@@ -2,10 +2,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import User
+from .models import Listing, User
 from .forms import ListingForm
 
 
@@ -75,6 +75,34 @@ def register(request):
 
 
 def add_listing(request):
-    form = ListingForm()
+    if request.method == "GET":
+        form = ListingForm()
 
-    return render(request, "auctions/add_listing.html", {"form": form})
+        return render(request, "auctions/add_listing.html", {"form": form})
+
+    if request.method == "POST":
+        form = ListingForm(request.POST)
+
+        if form.is_valid():
+            user = request.user
+            title = form.cleaned_data["title"]
+            description = form.cleaned_data["description"]
+            start_bid = form.cleaned_data["start_bid"]
+            image = form.cleaned_data["image"]
+            category = form.cleaned_data["category"]
+
+            listing = Listing(
+                user=user,
+                title=title,
+                description=description,
+                start_bid=start_bid,
+                image=image,
+                category=category,
+            )
+
+            listing.save()
+
+            return redirect(reverse("index"))  # <<<<<<<<<<< redirect to listing TODO
+
+        else:
+            render(request, "auctions/add_listing.html", {"form": form})
