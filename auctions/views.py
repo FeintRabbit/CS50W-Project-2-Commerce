@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.db.models import Max
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -15,6 +16,16 @@ from .forms import ListingForm
 
 def index(request):
     listings = Listing.objects.filter(active=True)
+
+    # TODO need to determine the highest bid then update each object in the queryset
+    # listing is query object, but vals can be edited or added.
+
+    # Loop through all listings objects
+    # check for bids, get highest value
+    # listing.bids.all().aggregate(Max('bid'))
+    # set 'current bid' from either starting bid or highest bid
+
+    # send to page
     return render(request, "auctions/index.html", {"listings": listings})
 
 
@@ -22,7 +33,7 @@ def listing(requst, listing_id):
     # query db for listing
     try:
         listing = Listing.objects.get(pk=listing_id)
-        # send to page
+
         return HttpResponse(listing)
 
     except Listing.DoesNotExist:
@@ -57,8 +68,6 @@ def add_listing(request):
             )
 
             listing.save()
-
-            print(listing.id)
 
             return redirect("listing", listing_id=listing.id)
 

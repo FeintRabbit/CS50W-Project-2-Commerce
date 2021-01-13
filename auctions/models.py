@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.deletion import CASCADE
+from django.db.models.fields.related import ForeignKey
 
 
 class User(AbstractUser):
@@ -51,9 +52,6 @@ class Category(models.Model):
         return f"{self.category}"
 
 
-# Category.objects.all()
-
-
 # bids
 """
 User (foreign key)
@@ -61,6 +59,16 @@ Listing (foreign key)
 Date
 Bid
 """
+
+
+class Bid(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE, related_name="bids")
+    listing = models.ForeignKey(Listing, on_delete=CASCADE, related_name="bids")
+    bid = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"${self.bid} - {self.user} on listing [{self.listing}]"
+
 
 # comments
 """
