@@ -1,0 +1,8 @@
+{
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": true,
+  "prettier.tabWidth": 4,
+  "python.formatting.provider": "black",
+  "python.pythonPath": "env\\Scripts\\python.exe",
+  "git.ignoreLimitWarning": true
+}
