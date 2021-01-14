@@ -40,18 +40,22 @@ def listing(request, listing_id):
                 max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
                 listing.current_bid = format(float(max_bid), ".2f")
 
-            # watchlist context
-            check_watchlist = Watchlist.objects.filter(user__exact=request.user).filter(
-                listing__exact=listing
-            )
-
             # listing comments context TODO
 
-            # error message from post attempt
+            # get context for logged in users
             error_message = None
-            if "error_message" in request.session:
-                error_message = request.session["error_message"]
-                del request.session["error_message"]
+            check_watchlist = None
+
+            if request.user.is_authenticated:
+                # watchlist context
+                check_watchlist = Watchlist.objects.filter(
+                    user__exact=request.user
+                ).filter(listing__exact=listing)
+
+                # error message from post attempt
+                if "error_message" in request.session:
+                    error_message = request.session["error_message"]
+                    del request.session["error_message"]
 
             return render(
                 request,
