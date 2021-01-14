@@ -7,20 +7,22 @@
 <!--  -->
 {% for listing in listings %}
 <!--  -->
-<article class="listing">
-    <div class="listing-info">
-        <!-- title, description, current price -->
-        <h4>{{ listing.title }}</h4>
-        <p>Current bid: ${{ listing.current_bid }}</p>
-        <p>{{ listing.description }}</p>
-    </div>
-    <div class="listing-image-container">
-        {% if listing.image %}
-        <img src="{{ listing.image }}" alt="" />
+<a href="{% url 'listing' listing.id %}">
+    <article class="listing">
+        <div class="listing-info">
+            <!-- title, description, current price -->
+            <h4>{{ listing.title }}</h4>
+            <p>Current bid: ${{ listing.current_bid }}</p>
+            <p>{{ listing.description }}</p>
+        </div>
+        <div class="listing-image-container">
+            {% if listing.image %}
+            <img src="{{ listing.image }}" alt="" />
 
-        {% endif %}
-    </div>
-</article>
+            {% endif %}
+        </div>
+    </article>
+</a>
 <!--  -->
 {% endfor %}
 <!--  -->
