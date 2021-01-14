@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import Listing, User
+from .models import Bid, Listing, User
 from .forms import ListingForm
 
 ####################
@@ -18,11 +18,6 @@ def index(request):
     # get active listings
     listings = Listing.objects.filter(active=True)
 
-    # Loop through all listings objects
-    # check for bids, get highest value
-    # listing.bids.all().aggregate(Max('bid'))
-    # set 'current bid' from either starting bid or max bid
-
     for i, listing in enumerate(listings):
         if not listing.bids.all():
             listings[i].current_bid = listings[i].start_bid
@@ -33,15 +28,65 @@ def index(request):
     return render(request, "auctions/index.html", {"listings": listings})
 
 
-def listing(requst, listing_id):
-    # query db for listing
-    try:
+def listing(request, listing_id):
+    if request.method == "GET":
+        try:
+            # listing information
+            listing = Listing.objects.get(pk=listing_id)
+
+            if not listing.bids.all():
+                listing.current_bid = listing.start_bid
+            else:
+                max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
+                listing.current_bid = format(float(max_bid), ".2f")
+
+            # listing comments context TODO
+
+            # error message from post attempt
+            error_message = None
+            if "error_message" in request.session:
+                error_message = request.session["error_message"]
+                del request.session["error_message"]
+
+            return render(
+                request,
+                "auctions/listing.html",
+                {"listing": listing, "error_message": error_message},
+            )
+
+        except Listing.DoesNotExist:
+            return redirect(reverse("index"))
+
+    # post for new bids
+    if request.method == "POST":
         listing = Listing.objects.get(pk=listing_id)
+        bid = float(request.POST["bid"])
 
-        return HttpResponse(listing)
+        if not listing.bids.all():
+            if bid >= listing.start_bid:
+                new_bid = Bid(user=request.user, listing=listing, bid=bid)
+                new_bid.save()
+            else:
+                request.session[
+                    "error_message"
+                ] = "Bid must be equal to or higher than start bid"
+        else:
+            max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
+            if bid > max_bid:
+                new_bid = Bid(user=request.user, listing=listing, bid=bid)
+                new_bid.save()
+            else:
+                request.session["error_message"] = "Bid must be higher than current bid"
 
-    except Listing.DoesNotExist:
-        return redirect(reverse("index"))
+        return redirect("listing", listing_id=listing_id)
+
+
+def bid(request):
+    pass
+
+
+def watchlist(request):
+    pass
 
 
 @login_required

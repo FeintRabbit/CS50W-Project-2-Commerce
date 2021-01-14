@@ -1,0 +1,59 @@
+{% extends "auctions/layout.html" %}
+<!--  -->
+{% block body %}
+
+<article class="listing">
+    <!-- end auction -->
+    {% if listing.user == request.user %}
+    <button type="submit">End auction?</button>
+    {% endif %}
+
+    <!-- title, user, current price -->
+    <h4>{{ listing.title }}</h4>
+    <p>Category: {{ listing.category }}</p>
+    <p>Listed by: {{ listing.user }}</p>
+    <p>Current bid: ${{ listing.current_bid }}</p>
+
+    <!-- signed in user -->
+    {% if user.is_authenticated %}
+    <!-- watchlist -->
+    <form action="{% url 'watchlist' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="listing" value="{{ listing.id }}" />
+        <button type="submit">Watchlist</button>
+    </form>
+    <!-- bid -->
+    <form action="{% url 'listing' listing.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Add Bid</button>
+        <input type="number" name="bid" step="0.01" value="0.00" placeholder="$0.00" />
+        <input type="hidden" name="user" value="{{ request.user.id }}" />
+    </form>
+    {% if error_message %}
+    <p style="color: red">{{ error_message }}</p>
+    {% endif %} {% endif %}
+
+    <!-- description -->
+    <br />
+    <h4>Description</h4>
+    <p>{{ listing.description }}</p>
+
+    {% if listing.image %}
+    <img src="{{ listing.image }}" alt="" />
+    {% endif %}
+
+    <!-- comment section -->
+    <div>
+        <h4>Comments:</h4>
+        <ul class="comments">
+            <!-- loop of comments -->
+            <li>sample comment</li>
+        </ul>
+    </div>
+    {% if user.is_authenticated %}
+    <!-- add comment -->
+    {% endif %}
+</article>
+<!--  -->
+
+{% endblock %}

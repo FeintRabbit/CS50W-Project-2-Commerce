@@ -11,7 +11,7 @@ a:hover {
     color: unset;
 }
 
-.listing {
+.listing-index {
     width: 100vw;
     max-width: 768px;
     display: grid;
@@ -22,7 +22,7 @@ a:hover {
     border-radius: 5px;
 }
 
-.listing:hover {
+.listing-index:hover {
     transform: scale(1.01);
 }
 

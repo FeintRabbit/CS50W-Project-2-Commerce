@@ -8,8 +8,8 @@
 {% for listing in listings %}
 <!--  -->
 <a href="{% url 'listing' listing.id %}">
-    <article class="listing">
-        <div class="listing-info">
+    <article class="listing-index">
+        <div class="listing-index-info">
             <!-- title, description, current price -->
             <h4>{{ listing.title }}</h4>
             <p>Current bid: ${{ listing.current_bid }}</p>
