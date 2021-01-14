@@ -14,6 +14,15 @@ User (Foreign key)
 Listings (Foreign key)
 """
 
+
+class Watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE, related_name="watchlist")
+    listing = models.ForeignKey("Listing", on_delete=CASCADE, related_name="watchlist")
+
+    def __str__(self):
+        return f"{self.id} - {self.user} watching {self.listing}"
+
+
 # auction listings
 """
 User (foreign key)

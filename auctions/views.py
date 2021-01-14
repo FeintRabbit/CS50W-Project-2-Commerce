@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import Bid, Listing, User
+from .models import Bid, Listing, User, Watchlist
 from .forms import ListingForm
 
 ####################
@@ -31,7 +31,7 @@ def index(request):
 def listing(request, listing_id):
     if request.method == "GET":
         try:
-            # listing information
+            # listing context
             listing = Listing.objects.get(pk=listing_id)
 
             if not listing.bids.all():
@@ -39,6 +39,11 @@ def listing(request, listing_id):
             else:
                 max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
                 listing.current_bid = format(float(max_bid), ".2f")
+
+            # watchlist context
+            check_watchlist = Watchlist.objects.filter(user__exact=request.user).filter(
+                listing__exact=listing
+            )
 
             # listing comments context TODO
 
@@ -51,7 +56,11 @@ def listing(request, listing_id):
             return render(
                 request,
                 "auctions/listing.html",
-                {"listing": listing, "error_message": error_message},
+                {
+                    "listing": listing,
+                    "check_watchlist": check_watchlist,
+                    "error_message": error_message,
+                },
             )
 
         except Listing.DoesNotExist:
@@ -81,12 +90,22 @@ def listing(request, listing_id):
         return redirect("listing", listing_id=listing_id)
 
 
-def bid(request):
-    pass
-
-
 def watchlist(request):
-    pass
+    if request.method == "POST":
+        listing_id = request.POST["listing"]
+        listing = Listing.objects.get(pk=listing_id)
+
+        # checks if listing in users watchlist
+        check_watchlist = Watchlist.objects.filter(user__exact=request.user).filter(
+            listing__exact=listing
+        )
+        if check_watchlist:
+            check_watchlist.delete()
+        else:
+            watchlist = Watchlist(user=request.user, listing=listing)
+            watchlist.save()
+
+        return redirect("listing", listing_id=listing_id)
 
 
 @login_required
