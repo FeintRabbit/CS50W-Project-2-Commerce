@@ -11,15 +11,7 @@
     <div class="listing-info">
         <!-- title, description, current price -->
         <h4>{{ listing.title }}</h4>
-        <p>
-            Current bid: $
-            <!-- TODO -->
-            <!-- figure out how to present the highest bid to the users -->
-
-            <!-- listing.bids.all().aggregate(Max('bid')) -->
-
-            {{ listing.bids.all.aggregate(Max('bid')) }} {% if listing.bids %} {{ listing.bids }} {% else %} {{ listing.start_bid }} {% endif %}
-        </p>
+        <p>Current bid: ${{ listing.current_bid }}</p>
         <p>{{ listing.description }}</p>
     </div>
     <div class="listing-image-container">

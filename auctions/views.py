@@ -15,17 +15,21 @@ from .forms import ListingForm
 
 
 def index(request):
+    # get active listings
     listings = Listing.objects.filter(active=True)
-
-    # TODO need to determine the highest bid then update each object in the queryset
-    # listing is query object, but vals can be edited or added.
 
     # Loop through all listings objects
     # check for bids, get highest value
     # listing.bids.all().aggregate(Max('bid'))
-    # set 'current bid' from either starting bid or highest bid
+    # set 'current bid' from either starting bid or max bid
 
-    # send to page
+    for i, listing in enumerate(listings):
+        if not listing.bids.all():
+            listings[i].current_bid = listings[i].start_bid
+        else:
+            max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
+            listings[i].current_bid = format(float(max_bid), ".2f")
+
     return render(request, "auctions/index.html", {"listings": listings})
 
 
