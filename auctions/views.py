@@ -149,22 +149,21 @@ def watchlist(request):
 
 
 def categories(request):
+    categories = Category.objects.all()
 
+    listings = None
     if "category" in request.GET:
         search = request.GET["category"]
-        category = Category.objects.filter(category__iexact=search)[0].listings.all()
+        listings = Category.objects.filter(category__iexact=search)[0].listings.all()
 
-    else:
-        category = Category.objects.all()
-
-        """
-        Category.objects.get(pk=2).listings.all()
-
-        Category.objects.filter(category__iexact='toys')[0].listings.all()
-
-        """
-
-    return HttpResponse(category)
+    return render(
+        request,
+        "auctions/categories.html",
+        {
+            "categories": categories,
+            "listings": listings,
+        },
+    )
 
 
 @login_required

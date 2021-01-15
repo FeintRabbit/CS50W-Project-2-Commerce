@@ -2,5 +2,30 @@
 <!--  -->
 {% block body %}
 
+<!-- categories -->
+<h4>Categories</h4>
+<ul>
+    {% for category in categories %}
+    <a href="{% url 'categories' %}?category={{ category }}">
+        <li>{{ category }}</li>
+    </a>
+    {% endfor %}
+</ul>
+<hr />
+<!-- listings -->
+{% if listings %}
+<h4>Listings</h4>
+<hr />
+<br />
+{% for listing in listings %} {% if listing.active %}
+<a href="{% url 'listing' listing.id %}">
+    <div class="listing-index-info">
+        <!-- title, description, current price -->
+        <h4>{{ listing.title }}</h4>
+        <p>{{ listing.description }}</p>
+    </div>
+</a>
+<hr />
+{% endif %} {% endfor %} {% endif %}
 <!--  -->
 {% endblock %}
