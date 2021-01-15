@@ -1,3 +1,4 @@
+from django import http
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -6,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import Bid, Comment, Listing, User, Watchlist
+from auctions.models import Bid, Category, Comment, Listing, User, Watchlist
 from .forms import ListingForm
 
 ####################
@@ -117,7 +118,19 @@ def listing(request, listing_id):
         return redirect("listing", listing_id=listing_id)
 
 
+@login_required
 def watchlist(request):
+    if request.method == "GET":
+        watchlist = request.user.watchlist.all()
+
+        return render(
+            request,
+            "auctions/watchlist.html",
+            {
+                "watchlist": watchlist,
+            },
+        )
+
     if request.method == "POST":
         listing_id = request.POST["listing"]
         listing = Listing.objects.get(pk=listing_id)
@@ -133,6 +146,25 @@ def watchlist(request):
             watchlist.save()
 
         return redirect("listing", listing_id=listing_id)
+
+
+def categories(request):
+
+    if "category" in request.GET:
+        search = request.GET["category"]
+        category = Category.objects.filter(category__iexact=search)[0].listings.all()
+
+    else:
+        category = Category.objects.all()
+
+        """
+        Category.objects.get(pk=2).listings.all()
+
+        Category.objects.filter(category__iexact='toys')[0].listings.all()
+
+        """
+
+    return HttpResponse(category)
 
 
 @login_required

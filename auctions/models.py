@@ -23,6 +23,19 @@ class Watchlist(models.Model):
         return f"{self.id} - {self.user} watching {self.listing}"
 
 
+# auction categories
+"""
+Category
+"""
+
+
+class Category(models.Model):
+    category = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.category}"
+
+
 # auction listings
 """
 User (foreign key)
@@ -42,26 +55,15 @@ class Listing(models.Model):
     description = models.TextField()
     start_bid = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.URLField(blank=True)
-    category = models.ForeignKey("Category", on_delete=CASCADE, blank=True)
+    category = models.ForeignKey(
+        Category, on_delete=CASCADE, blank=True, related_name="listings"
+    )
     winner = models.ForeignKey(
         User, on_delete=CASCADE, related_name="listings_won", blank=True, null=True
     )
 
     def __str__(self):
         return f"{self.id}: {self.user} - {self.title}"
-
-
-# auction categories
-"""
-Category
-"""
-
-
-class Category(models.Model):
-    category = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f"{self.category}"
 
 
 # bids
