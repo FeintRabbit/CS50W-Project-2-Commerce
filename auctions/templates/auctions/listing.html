@@ -29,7 +29,7 @@
     <form action="{% url 'watchlist' %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="listing" value="{{ listing.id }}" />
-        <button type="submit">{% if check_watchlist %} Add to Watchlist {% else %} Remove from Watchlist {% endif %}</button>
+        <button type="submit">{% if check_watchlist %} Remove from Watchlist {% else %} Add to Watchlist {% endif %}</button>
     </form>
     <!-- bid -->
     <form action="{% url 'listing' listing.id %}" method="post">

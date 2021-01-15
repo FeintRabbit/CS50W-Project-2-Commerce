@@ -91,7 +91,7 @@ def listing(request, listing_id):
                     ] = "Bid must be equal to or higher than start bid"
             else:
                 max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
-                if bid > max_bid:
+                if bid > float(max_bid):
                     new_bid = Bid(user=request.user, listing=listing, bid=bid)
                     new_bid.save()
                 else:
