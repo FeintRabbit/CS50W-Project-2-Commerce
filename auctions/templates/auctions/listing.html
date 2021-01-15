@@ -2,20 +2,30 @@
 <!--  -->
 {% block body %}
 
+<!-- # update page for winner context (i.e. closed auction)  -->
+<!-- # add 'you won' if user == winner -->
+
 <article class="listing">
     <!-- end auction -->
-    {% if listing.user == request.user %}
-    <button type="submit">End auction?</button>
+    {% if listing.user == request.user and listing.active %}
+    <form action="{% url 'listing' listing.id %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="end" />
+        <button type="submit">End auction?</button>
+    </form>
     {% endif %}
 
     <!-- title, user, current price -->
+    <br />
     <h4>{{ listing.title }}</h4>
     <p>Category: {{ listing.category }}</p>
     <p>Listed by: {{ listing.user }}</p>
-    <p>Current bid: ${{ listing.current_bid }}</p>
+    <p>Current bid: <strong> ${{ listing.current_bid }}</strong></p>
+
+    <hr />
 
     <!-- signed in user -->
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and listing.active %}
     <!-- watchlist -->
     <form action="{% url 'watchlist' %}" method="post">
         {% csrf_token %}
@@ -32,6 +42,15 @@
     {% if error_message %}
     <p style="color: red">{{ error_message }}</p>
     {% endif %} {% endif %}
+
+    <!-- listing over -->
+    {% if not listing.active %}
+    <p>This listing is finished.</p>
+    {% if request.user == listing.winner %}
+    <p>You won this auction!</p>
+    {% endif %} {% endif %}
+
+    <hr />
 
     <!-- description -->
     <br />

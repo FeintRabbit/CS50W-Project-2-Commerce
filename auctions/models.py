@@ -43,6 +43,9 @@ class Listing(models.Model):
     start_bid = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.URLField(blank=True)
     category = models.ForeignKey("Category", on_delete=CASCADE, blank=True)
+    winner = models.ForeignKey(
+        User, on_delete=CASCADE, related_name="listings_won", blank=True, null=True
+    )
 
     def __str__(self):
         return f"{self.id}: {self.user} - {self.title}"
@@ -85,3 +88,9 @@ User (foreign key)
 Listing (foreign key)
 comments
 """
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=CASCADE, related_name="comments")
+    listing = models.ForeignKey(Listing, on_delete=CASCADE, related_name="comments")
+    comment = models.CharField(max_length=280)

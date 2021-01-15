@@ -29,69 +29,82 @@ def index(request):
 
 
 def listing(request, listing_id):
+    # redirect user to index if navigating to an invalid listing id
+    try:
+        # listing context
+        listing = Listing.objects.get(pk=listing_id)
+
+    except Listing.DoesNotExist:
+        return redirect(reverse("index"))
+
+    # set the current_bid
+    if not listing.bids.all():
+        listing.current_bid = listing.start_bid
+    else:
+        max_bid = listing.bids.all().aggregate(Max("bid"))
+        listing.current_bid = format(float(max_bid["bid__max"]), ".2f")
+
     if request.method == "GET":
-        try:
-            # listing context
-            listing = Listing.objects.get(pk=listing_id)
 
-            if not listing.bids.all():
-                listing.current_bid = listing.start_bid
-            else:
-                max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
-                listing.current_bid = format(float(max_bid), ".2f")
+        # listing comments context TODO
 
-            # listing comments context TODO
+        # get context for logged in users
+        error_message = None
+        check_watchlist = None
 
-            # get context for logged in users
-            error_message = None
-            check_watchlist = None
-
-            if request.user.is_authenticated:
-                # watchlist context
-                check_watchlist = Watchlist.objects.filter(
-                    user__exact=request.user
-                ).filter(listing__exact=listing)
-
-                # error message from post attempt
-                if "error_message" in request.session:
-                    error_message = request.session["error_message"]
-                    del request.session["error_message"]
-
-            return render(
-                request,
-                "auctions/listing.html",
-                {
-                    "listing": listing,
-                    "check_watchlist": check_watchlist,
-                    "error_message": error_message,
-                },
+        if request.user.is_authenticated:
+            # watchlist context
+            check_watchlist = Watchlist.objects.filter(user__exact=request.user).filter(
+                listing__exact=listing
             )
 
-        except Listing.DoesNotExist:
-            return redirect(reverse("index"))
+            # error message from post attempt
+            if "error_message" in request.session:
+                error_message = request.session["error_message"]
+                del request.session["error_message"]
 
-    # post for new bids
+        return render(
+            request,
+            "auctions/listing.html",
+            {
+                "listing": listing,
+                "check_watchlist": check_watchlist,
+                "error_message": error_message,
+            },
+        )
+
     if request.method == "POST":
-        listing = Listing.objects.get(pk=listing_id)
-        bid = float(request.POST["bid"])
+        # post for new bids
+        if "bid" in request.POST:
+            bid = float(request.POST["bid"])
 
-        if not listing.bids.all():
-            if bid >= listing.start_bid:
-                new_bid = Bid(user=request.user, listing=listing, bid=bid)
-                new_bid.save()
+            if not listing.bids.all():
+                if bid >= listing.start_bid:
+                    new_bid = Bid(user=request.user, listing=listing, bid=bid)
+                    new_bid.save()
+                else:
+                    request.session[
+                        "error_message"
+                    ] = "Bid must be equal to or higher than start bid"
             else:
-                request.session[
-                    "error_message"
-                ] = "Bid must be equal to or higher than start bid"
-        else:
-            max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
-            if bid > max_bid:
-                new_bid = Bid(user=request.user, listing=listing, bid=bid)
-                new_bid.save()
-            else:
-                request.session["error_message"] = "Bid must be higher than current bid"
+                max_bid = listing.bids.all().aggregate(Max("bid"))["bid__max"]
+                if bid > max_bid:
+                    new_bid = Bid(user=request.user, listing=listing, bid=bid)
+                    new_bid.save()
+                else:
+                    request.session[
+                        "error_message"
+                    ] = "Bid must be higher than current bid"
 
-        return redirect("listing", listing_id=listing_id)
+            return redirect("listing", listing_id=listing_id)
+
+        # post for closing auction
+        if "end" in request.POST:
+            listing.active = False
+            listing.winner = listing.bids.order_by("-bid")[0].user
+            listing.save()
+
+            return redirect("listing", listing_id=listing_id)
 
 
 def watchlist(request):
