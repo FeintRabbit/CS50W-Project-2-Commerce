@@ -22,9 +22,8 @@
     <p>Listed by: {{ listing.user }}</p>
     <p>Current bid: <strong> ${{ listing.current_bid }}</strong></p>
 
-    <hr />
-
     <!-- signed in user -->
+    <hr />
     {% if user.is_authenticated and listing.active %}
     <!-- watchlist -->
     <form action="{% url 'watchlist' %}" method="post">
@@ -48,9 +47,9 @@
     <p>This listing is finished.</p>
     {% if request.user == listing.winner %}
     <p>You won this auction!</p>
-    {% endif %} {% endif %}
-
+    {% endif %}
     <hr />
+    {% endif %}
 
     <!-- description -->
     <br />
@@ -66,11 +65,17 @@
         <h4>Comments:</h4>
         <ul class="comments">
             <!-- loop of comments -->
-            <li>sample comment</li>
+            {% for comment in comments %}
+            <li><strong>{{ comment.user}} </strong>: {{ comment.comment }}</li>
+            {% endfor %}
         </ul>
     </div>
     {% if user.is_authenticated %}
-    <!-- add comment -->
+    <form action="{% url 'listing' listing.id %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="comment" />
+        <button type="submit">Add comment</button>
+    </form>
     {% endif %}
 </article>
 <!--  -->

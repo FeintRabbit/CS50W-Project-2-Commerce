@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from .models import Bid, Listing, User, Watchlist
+from .models import Bid, Comment, Listing, User, Watchlist
 from .forms import ListingForm
 
 ####################
@@ -47,6 +47,7 @@ def listing(request, listing_id):
     if request.method == "GET":
 
         # listing comments context TODO
+        comments = listing.comments.all()
 
         # get context for logged in users
         error_message = None
@@ -70,6 +71,7 @@ def listing(request, listing_id):
                 "listing": listing,
                 "check_watchlist": check_watchlist,
                 "error_message": error_message,
+                "comments": comments,
             },
         )
 
@@ -105,6 +107,14 @@ def listing(request, listing_id):
             listing.save()
 
             return redirect("listing", listing_id=listing_id)
+
+    if request.method == "POST":
+        comment = Comment(
+            user=request.user, listing=listing, comment=request.POST["comment"]
+        )
+        comment.save()
+
+        return redirect("listing", listing_id=listing_id)
 
 
 def watchlist(request):
